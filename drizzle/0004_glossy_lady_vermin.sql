@@ -1,0 +1,1 @@
+DROP INDEX `one_employee_per_day`;

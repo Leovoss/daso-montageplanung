@@ -1,0 +1,1 @@
+ALTER TABLE `contacts` ADD `mobile` text DEFAULT '' NOT NULL;

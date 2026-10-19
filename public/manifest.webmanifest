@@ -1,0 +1,9 @@
+{
+  "name": "DaSo Montageplanung",
+  "short_name": "DaSo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#492ade",
+  "icons": [{ "src": "/daso-logo.png", "sizes": "1348x690", "type": "image/png", "purpose": "any" }]
+}

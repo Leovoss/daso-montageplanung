@@ -20,7 +20,7 @@ export function dayInfo(assignments:A[],punches:P[],resourceId:string,day:string
     type,
     projectId:work[0]?.project_id||a?.project_id||null,
     travelStart:travel.length?hm(travel[0].started):'',
-    travelEnd:travel.length?hm(travel[travel.length-1].ended!):'',
+    travelEnd:travel.length?hm(lastEnd):'',
     travelHours:travel.length?sum(travel).toFixed(2):'',
     absence:away?'0':travel.length?hrs(travel[0].started,lastEnd).toFixed(2):'',
     workStart:work.length?hm(work[0].started):'',

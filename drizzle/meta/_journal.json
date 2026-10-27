@@ -85,6 +85,13 @@
       "when": 1792425793907,
       "tag": "0011_right_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793119906589,
+      "tag": "0012_magical_bastion",
+      "breakpoints": true
     }
   ]
 }

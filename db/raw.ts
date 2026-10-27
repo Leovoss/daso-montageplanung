@@ -6,7 +6,7 @@ export type CurrentUser={id:string;email:string;name:string;accessRole:AccessRol
 export async function currentUser(r:Request):Promise<CurrentUser|null>{
   const email=r.headers.get('cf-access-authenticated-user-email')?.trim().toLowerCase();
   if(!email) return null;
-  const row=await db().prepare('SELECT * FROM users WHERE email=?').bind(email).first<any>();
+  const row=await db().prepare('SELECT u.* FROM users u LEFT JOIN resources r ON r.id=u.resource_id WHERE u.email=? AND r.archived_at IS NULL').bind(email).first<any>();
   if(!row) return null;
   return {id:row.id,email:row.email,name:row.name,accessRole:row.access_role,resourceId:row.resource_id};
 }

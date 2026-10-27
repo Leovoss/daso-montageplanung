@@ -7,6 +7,7 @@ const devAccess = (): Plugin => ({
   name: "dev-access",
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
+      if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(req.socket.remoteAddress ?? "")) return next();
       req.headers["cf-access-authenticated-user-email"] = devUserEmail;
       req.rawHeaders.push("cf-access-authenticated-user-email", devUserEmail);
       next();

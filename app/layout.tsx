@@ -4,9 +4,6 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "DaSo · Montageplanung",
   description: "Mitarbeiter und Nachunternehmer einteilen, Projektunterlagen verwalten und Zeiten erfassen.",
-  other: {
-    "codex-preview": "development",
-  },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/favicon.svg",

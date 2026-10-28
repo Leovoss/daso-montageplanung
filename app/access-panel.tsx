@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Archive, ArchiveRestore, KeyRound, Pencil, Trash2 } from 'lucide-react';
+import { Archive, ArchiveRestore, Check, KeyRound, Pencil, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,27 +24,38 @@ const blank = { userId: '', resourceId: '', name: '', role: 'Monteur', email: ''
 
 export function AccessPanel({ users, employees, audit, mutate }: { users: AppUser[]; employees: Person[]; audit: AuditEntry[]; mutate: (body: unknown, close?: boolean) => Promise<boolean> }) {
   const [form, setForm] = useState(blank);
+  const [edit, setEdit] = useState<(typeof blank & { key: string }) | null>(null);
   const set = (k: keyof typeof blank, v: string) => setForm(f => ({ ...f, [k]: v }));
-  const editing = !!(form.userId || form.resourceId);
+  const setE = (k: keyof typeof blank, v: string) => setEdit(f => f && { ...f, [k]: v });
   const userOf = (rid: string) => users.find(u => u.resource_id === rid);
   const ordered = [...employees.filter(e => !e.archived_at), ...employees.filter(e => e.archived_at)];
   const loose = users.filter(u => !employees.some(e => e.id === u.resource_id));
 
-  async function save() {
-    const body = form.role
-      ? { action: 'employee', id: form.resourceId || undefined, name: form.name, role: form.role, email: form.email.trim(), accessRole: form.accessRole }
-      : { action: 'user', id: form.userId || undefined, name: form.name, email: form.email.trim(), accessRole: form.accessRole, resourceId: null };
-    if (await mutate(body, false)) setForm(blank);
-  }
+  const send = (f: typeof blank) => mutate(f.role
+    ? { action: 'employee', id: f.resourceId || undefined, name: f.name, role: f.role, email: f.email.trim(), accessRole: f.accessRole }
+    : { action: 'user', id: f.userId || undefined, name: f.name, email: f.email.trim(), accessRole: f.accessRole, resourceId: null }, false);
+  const add = async () => { if (await send(form)) setForm(blank); };
+  const saveEdit = async () => { if (edit && await send(edit)) setEdit(null); };
 
   const editEmployee = (e: Person) => {
     const u = userOf(e.id);
-    setForm({ userId: u?.id || '', resourceId: e.id, name: e.name, role: e.role === 'Obermonteur' ? 'Obermonteur' : 'Monteur', email: u?.email || '', accessRole: u?.access_role || 'monteur' });
+    setEdit({ key: e.id, userId: u?.id || '', resourceId: e.id, name: e.name, role: e.role === 'Obermonteur' ? 'Obermonteur' : 'Monteur', email: u?.email || '', accessRole: u?.access_role || 'monteur' });
   };
   const removeAccess = (u: AppUser) => {
     if (window.confirm(`Zugang von ${u.name} entfernen?`)) mutate({ action: 'deleteUser', id: u.id }, false);
   };
-  const canSave = form.name.trim() && (form.role || form.email.trim());
+  const valid = (f: typeof blank) => f.name.trim() && (f.role || f.email.trim());
+  const accessSelect = (f: typeof blank, on: (k: keyof typeof blank, v: string) => void) => (
+    <NativeSelect value={f.accessRole} onChange={e => on('accessRole', e.target.value)}>
+      {Object.entries(roles).map(([k, v]) => <NativeSelectOption key={k} value={k}>{v}</NativeSelectOption>)}
+    </NativeSelect>
+  );
+  const saveCancel = (f: typeof blank) => (
+    <div className="button-row justify-end">
+      <Button variant="ghost" size="icon" aria-label="Speichern" title="Speichern" disabled={!valid(f)} onClick={saveEdit}><Check /></Button>
+      <Button variant="ghost" size="icon" aria-label="Abbrechen" title="Abbrechen" onClick={() => setEdit(null)}><X /></Button>
+    </div>
+  );
 
   return (
     <section className="panel resource-panel">
@@ -58,7 +69,7 @@ export function AccessPanel({ users, employees, audit, mutate }: { users: AppUse
         <div className="form-field"><Label>Name</Label><Input value={form.name} onChange={e => set('name', e.target.value)} /></div>
         <div className="form-field">
           <Label>Funktion</Label>
-          <NativeSelect value={form.role} onChange={e => set('role', e.target.value)} disabled={!!form.userId && !form.resourceId}>
+          <NativeSelect value={form.role} onChange={e => set('role', e.target.value)}>
             <NativeSelectOption value="Monteur">Monteur</NativeSelectOption>
             <NativeSelectOption value="Obermonteur">Obermonteur</NativeSelectOption>
             <NativeSelectOption value="">Nur Zugang, kein Mitarbeiter</NativeSelectOption>
@@ -67,13 +78,10 @@ export function AccessPanel({ users, employees, audit, mutate }: { users: AppUse
         <div className="form-field"><Label>E-Mail für den Zugang</Label><Input type="email" placeholder="optional" value={form.email} onChange={e => set('email', e.target.value)} /></div>
         <div className="form-field">
           <Label>Zugriffsrolle</Label>
-          <NativeSelect value={form.accessRole} onChange={e => set('accessRole', e.target.value)}>
-            {Object.entries(roles).map(([k, v]) => <NativeSelectOption key={k} value={k}>{v}</NativeSelectOption>)}
-          </NativeSelect>
+          {accessSelect(form, set)}
         </div>
         <div className="button-row">
-          <Button disabled={!canSave} onClick={save}>{editing ? 'Speichern' : 'Hinzufügen'}</Button>
-          {editing && <Button variant="outline" onClick={() => setForm(blank)}>Abbrechen</Button>}
+          <Button disabled={!valid(form)} onClick={add}>Hinzufügen</Button>
         </div>
       </div>
       <Table>
@@ -82,6 +90,20 @@ export function AccessPanel({ users, employees, audit, mutate }: { users: AppUse
           {ordered.map(e => {
             const u = userOf(e.id);
             const archived = !!e.archived_at;
+            if (edit?.key === e.id) return (
+              <TableRow key={e.id}>
+                <TableCell><Input value={edit.name} onChange={x => setE('name', x.target.value)} /></TableCell>
+                <TableCell>
+                  <NativeSelect value={edit.role} onChange={x => setE('role', x.target.value)}>
+                    <NativeSelectOption value="Monteur">Monteur</NativeSelectOption>
+                    <NativeSelectOption value="Obermonteur">Obermonteur</NativeSelectOption>
+                  </NativeSelect>
+                </TableCell>
+                <TableCell><div style={{ display: 'grid', gap: '.5rem' }}><Input type="email" placeholder="E-Mail, leer = kein Zugang" value={edit.email} onChange={x => setE('email', x.target.value)} />{accessSelect(edit, setE)}</div></TableCell>
+                <TableCell>{archived ? 'Archiviert' : 'Aktiv'}</TableCell>
+                <TableCell>{saveCancel(edit)}</TableCell>
+              </TableRow>
+            );
             return (
               <TableRow key={e.id} style={archived ? { opacity: 0.6 } : undefined}>
                 <TableCell><b>{e.name}</b></TableCell>
@@ -98,7 +120,15 @@ export function AccessPanel({ users, employees, audit, mutate }: { users: AppUse
               </TableRow>
             );
           })}
-          {loose.map(u => (
+          {loose.map(u => edit?.key === u.id ? (
+            <TableRow key={u.id}>
+              <TableCell><Input value={edit.name} onChange={x => setE('name', x.target.value)} /></TableCell>
+              <TableCell><small>Kein Mitarbeiter</small></TableCell>
+              <TableCell><div style={{ display: 'grid', gap: '.5rem' }}><Input type="email" value={edit.email} onChange={x => setE('email', x.target.value)} />{accessSelect(edit, setE)}</div></TableCell>
+              <TableCell>Aktiv</TableCell>
+              <TableCell>{saveCancel(edit)}</TableCell>
+            </TableRow>
+          ) : (
             <TableRow key={u.id}>
               <TableCell><b>{u.name}</b></TableCell>
               <TableCell><small>Kein Mitarbeiter</small></TableCell>
@@ -106,7 +136,7 @@ export function AccessPanel({ users, employees, audit, mutate }: { users: AppUse
               <TableCell>Aktiv</TableCell>
               <TableCell>
                 <div className="button-row justify-end">
-                  <Button variant="ghost" size="icon" aria-label={u.name + ' bearbeiten'} title="Bearbeiten" onClick={() => setForm({ userId: u.id, resourceId: '', name: u.name, role: '', email: u.email, accessRole: u.access_role })}><Pencil /></Button>
+                  <Button variant="ghost" size="icon" aria-label={u.name + ' bearbeiten'} title="Bearbeiten" onClick={() => setEdit({ key: u.id, userId: u.id, resourceId: '', name: u.name, role: '', email: u.email, accessRole: u.access_role })}><Pencil /></Button>
                   <Button variant="ghost" size="icon" aria-label={'Zugang von ' + u.name + ' entfernen'} title="Zugang entfernen" onClick={() => removeAccess(u)}><Trash2 /></Button>
                 </div>
               </TableCell>

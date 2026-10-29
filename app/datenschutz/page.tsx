@@ -93,12 +93,6 @@ export default function Datenschutz() {
           anzuzeigen. Dabei werden ausschließlich die Koordinaten der
           jeweiligen Stempelposition übertragen.
         </p>
-        <p>
-          Die Schriftart der Anwendung (IBM Plex Sans) wird beim Aufruf von
-          Google Fonts (Google Ireland Limited) geladen. Dabei wird die
-          IP-Adresse der aufrufenden Person an Google übermittelt. Es werden
-          keine Planungs- oder Mitarbeiterdaten übertragen.
-        </p>
 
         <h2>8. Rechte der Mitarbeitenden</h2>
         <p>

@@ -74,11 +74,6 @@ Betreiber: OpenStreetMap Foundation) übermittelt, um daraus eine lesbare
 Adresse anzuzeigen. Es werden dabei ausschließlich die Koordinaten der
 jeweiligen Stempelposition übertragen, keine weiteren Personendaten.
 
-Die Schriftart der Anwendung (IBM Plex Sans) wird beim Aufruf von Google
-Fonts (Google Ireland Limited) geladen. Dabei wird die IP-Adresse der
-aufrufenden Person an Google übermittelt. Es werden keine Planungs- oder
-Mitarbeiterdaten übertragen.
-
 ## 8. Rechte der Mitarbeitenden
 
 Jede betroffene Person hat das Recht auf Auskunft, Berichtigung, Löschung und

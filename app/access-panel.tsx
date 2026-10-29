@@ -18,6 +18,7 @@ const actions: Record<string, string> = {
   deleteResource: 'Ressource gelöscht', project: 'Projekt gespeichert', archiveProject: 'Projekt archiviert',
   restoreProject: 'Projekt wiederhergestellt', deleteProject: 'Projekt gelöscht', assign: 'Einteilung angelegt',
   deleteAssignment: 'Einteilung gelöscht', unassign: 'Einteilungen entfernt', customer: 'Kunde gespeichert',
+  requestVacation: 'Urlaub beantragt', approveVacation: 'Urlaub genehmigt', rejectVacation: 'Urlaub abgelehnt', withdrawVacation: 'Urlaubsantrag zurückgezogen',
   deleteCustomer: 'Kunde gelöscht', contact: 'Ansprechpartner gespeichert', deleteContact: 'Ansprechpartner gelöscht',
 };
 const blank = { userId: '', resourceId: '', name: '', role: 'Monteur', email: '', accessRole: 'monteur' };
